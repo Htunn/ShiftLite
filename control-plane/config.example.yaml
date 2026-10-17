@@ -1,0 +1,54 @@
+# KubeWeave control plane config (see SPEC-001 Data Model).
+# Copy to config.yaml, fill in real values, and point signing_key at PEM files
+# generated with: openssl genpkey -algorithm ed25519 -out private.pem
+#                 openssl pkey -in private.pem -pubout -out public.pem
+
+bind_addr: "0.0.0.0:8080"
+ui_origin: "http://localhost:5173"
+home_namespace: "kubeweave-system"
+
+signing_key:
+  private_key_path: "./dev-keys/private.pem"
+  public_key_path: "./dev-keys/public.pem"
+
+role_mappings:
+  - group: "platform-admin"
+    role: "platform-admin"
+  - group: "dev-team-a"
+    role: "developer"
+    namespaces: ["team-a"]
+
+oauth_providers:
+  github:
+    authorize_url: "https://github.com/login/oauth/authorize"
+    token_url: "https://github.com/login/oauth/access_token"
+    client_id: "CHANGE_ME"
+    client_secret: "CHANGE_ME"
+    redirect_uri: "http://localhost:8080/api/v1/auth/callback"
+    scopes: ["read:user", "user:email", "read:org"]
+  keycloak:
+    authorize_url: "https://keycloak.example.com/realms/kubeweave/protocol/openid-connect/auth"
+    token_url: "https://keycloak.example.com/realms/kubeweave/protocol/openid-connect/token"
+    issuer: "https://keycloak.example.com/realms/kubeweave"
+    jwks_url: "https://keycloak.example.com/realms/kubeweave/protocol/openid-connect/certs"
+    client_id: "CHANGE_ME"
+    client_secret: "CHANGE_ME"
+    redirect_uri: "http://localhost:8080/api/v1/auth/callback"
+    scopes: ["openid", "profile", "email", "groups"]
+
+clusters:
+  - id: "cluster-k3s-edge-01"
+    name: "Edge k3s"
+    kubeconfig_path: "./dev-keys/k3s-edge-01.kubeconfig"
+    registry:
+      url: "ghcr.io/example-org"
+      username: "example-org-bot"
+      password_secret_ref: "ghcr-push-credential"
+  - id: "cluster-k8s-prod"
+    name: "Production k8s"
+    kubeconfig_path: "./dev-keys/k8s-prod.kubeconfig"
+    ingress_class: "nginx"
+    registry:
+      url: "registry.gitlab.com/example-org"
+      username: "example-org-bot"
+      password_secret_ref: "gitlab-push-credential"

@@ -1,0 +1,25 @@
+[package]
+name = "kubeweave-cluster"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+chrono.workspace = true
+futures = "=0.3.31"
+k8s-openapi = { version = "0.28.0", features = ["v1_32"] }
+kube = { version = "4.2.0", default-features = false, features = ["client", "rustls-tls"] }
+kubeweave-auth.workspace = true
+kubeweave-core.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tokio = { workspace = true, features = ["full"] }
+tracing.workspace = true
+
+[dev-dependencies]
+bytes = "1.12.1"
+http = "1.5.0"
+http-body-util = "0.1.5"
+tower = { version = "0.5.3", features = ["util"] }

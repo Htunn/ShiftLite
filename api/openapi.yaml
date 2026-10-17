@@ -1,0 +1,412 @@
+openapi: 3.0.3
+info:
+  title: KubeWeave Control Plane API
+  version: 1.0.0
+  description: REST and SSE interface driving the KubeWeave platform (Rust control plane).
+servers:
+  - url: /
+security:
+  - sessionCookie: []
+tags:
+  - name: auth
+  - name: clusters
+  - name: apps
+paths:
+  /api/v1/auth/login:
+    get:
+      tags: [auth]
+      summary: Initiate OIDC/OAuth2 login flow
+      operationId: login
+      security: []
+      parameters:
+        - name: provider
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Provider'
+      responses:
+        '302':
+          description: Redirect to Identity Provider; sets short-lived kw_oauth cookie
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+            Set-Cookie:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/callback:
+    get:
+      tags: [auth]
+      summary: OAuth2 Authorization Code callback
+      operationId: authCallback
+      security: []
+      parameters:
+        - name: code
+          in: query
+          schema: { type: string }
+        - name: state
+          in: query
+          schema: { type: string }
+        - name: error
+          in: query
+          description: IdP error code (for example access_denied)
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirect to the UI; sets kw_session cookie on success, or /login?error=... on IdP error
+          headers:
+            Location:
+              schema: { type: string }
+            Set-Cookie:
+              schema: { type: string }
+        '400': { $ref: '#/components/responses/Error' }
+        '401': { $ref: '#/components/responses/Error' }
+        '502': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: End the session
+      operationId: logout
+      responses:
+        '204':
+          description: Session cookie cleared
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: Current user
+      operationId: me
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserInfo' }
+        '401': { $ref: '#/components/responses/Error' }
+  /api/v1/clusters:
+    get:
+      tags: [clusters]
+      summary: List target clusters
+      operationId: listClusters
+      responses:
+        '200':
+          description: Registered clusters
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ClusterInfo' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+  /api/v1/namespaces/{namespace}/apps:
+    parameters:
+      - $ref: '#/components/parameters/Namespace'
+    get:
+      tags: [apps]
+      summary: List applications in a namespace
+      operationId: listApps
+      parameters:
+        - $ref: '#/components/parameters/ClusterQuery'
+      responses:
+        '200':
+          description: Applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/AppSummary' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    post:
+      tags: [apps]
+      summary: Create new application deployment
+      operationId: createApp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAppPayload' }
+      responses:
+        '201':
+          description: Created; status is Pending
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppSummary' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+        '409': { $ref: '#/components/responses/Error' }
+        '422': { $ref: '#/components/responses/Error' }
+        '503': { $ref: '#/components/responses/Error' }
+  /api/v1/namespaces/{namespace}/apps/{appName}:
+    parameters:
+      - $ref: '#/components/parameters/Namespace'
+      - $ref: '#/components/parameters/AppName'
+      - $ref: '#/components/parameters/ClusterQuery'
+    get:
+      tags: [apps]
+      summary: Get application detail
+      operationId: getApp
+      responses:
+        '200':
+          description: Application detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AppDetail' }
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+    delete:
+      tags: [apps]
+      summary: Delete an application
+      operationId: deleteApp
+      responses:
+        '202':
+          description: Deletion accepted (finalizers clean up resources)
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /api/v1/namespaces/{namespace}/apps/{appName}/logs/stream:
+    parameters:
+      - $ref: '#/components/parameters/Namespace'
+      - $ref: '#/components/parameters/AppName'
+      - $ref: '#/components/parameters/ClusterQuery'
+    get:
+      tags: [apps]
+      summary: Stream application logs via Server-Sent Events (SSE)
+      operationId: streamLogs
+      parameters:
+        - name: container
+          in: query
+          schema: { type: string }
+        - name: tail
+          in: query
+          schema: { type: integer, minimum: 0, maximum: 5000, default: 100 }
+        - name: follow
+          in: query
+          schema: { type: boolean, default: true }
+        - name: Last-Event-ID
+          in: header
+          description: RFC 3339 timestamp of the last received event; resumes best-effort
+          schema: { type: string }
+      responses:
+        '200':
+          description: >
+            Event stream. Events: "log" with LogEvent JSON data, "end" with {"reason": string}.
+            A ": keepalive" comment is sent every 15 seconds.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '401': { $ref: '#/components/responses/Error' }
+        '403': { $ref: '#/components/responses/Error' }
+        '404': { $ref: '#/components/responses/Error' }
+  /healthz:
+    get:
+      summary: Liveness
+      operationId: healthz
+      security: []
+      responses:
+        '200': { description: OK }
+  /readyz:
+    get:
+      summary: Readiness
+      operationId: readyz
+      security: []
+      responses:
+        '200': { description: Ready }
+        '503': { description: Not ready }
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: kw_session
+  parameters:
+    Namespace:
+      name: namespace
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+        maxLength: 63
+    AppName:
+      name: appName
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+        maxLength: 63
+    ClusterQuery:
+      name: cluster
+      in: query
+      description: Cluster id. Required when the app name exists on more than one cluster.
+      schema: { type: string }
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+  schemas:
+    Provider:
+      type: string
+      enum: [github, entraid, keycloak, rhsso]
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          enum:
+            - invalid_provider
+            - invalid_state
+            - idp_unavailable
+            - idp_validation_failed
+            - idp_exchange_failed
+            - unauthenticated
+            - forbidden
+            - namespace_not_found
+            - cluster_not_found
+            - app_not_found
+            - already_exists
+            - validation_failed
+            - builder_not_supported
+            - cluster_unreachable
+            - internal
+        message: { type: string }
+        requestId: { type: string }
+        fields:
+          type: array
+          items:
+            type: object
+            required: [field, reason]
+            properties:
+              field: { type: string }
+              reason: { type: string }
+    UserInfo:
+      type: object
+      required: [sub, provider, roles]
+      properties:
+        sub: { type: string }
+        email: { type: string }
+        provider: { $ref: '#/components/schemas/Provider' }
+        groups:
+          type: array
+          items: { type: string }
+        roles:
+          type: array
+          items:
+            type: string
+            enum: [viewer, developer, platform-admin]
+    ClusterInfo:
+      type: object
+      required: [id, name, type, version, status]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        type:
+          type: string
+          enum: [k8s, k3s]
+        version: { type: string }
+        status:
+          type: string
+          enum: [Ready, Unreachable]
+        ingressClass: { type: string }
+        storageClass: { type: string, nullable: true }
+        allowedBuilders:
+          type: array
+          items: { $ref: '#/components/schemas/Builder' }
+        registry:
+          type: object
+          required: [url]
+          properties:
+            url: { type: string, example: ghcr.io/org }
+            username: { type: string }
+    Builder:
+      type: string
+      enum: [buildkit, dockerfile]
+    CreateAppPayload:
+      type: object
+      required: [name, gitRepository, targetCluster]
+      properties:
+        name:
+          type: string
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+          maxLength: 63
+          example: auth-service
+        gitRepository:
+          type: string
+          pattern: '^https://'
+          example: https://github.com/org/auth-service.git
+        branch:
+          type: string
+          default: main
+        builder:
+          $ref: '#/components/schemas/Builder'
+        targetCluster:
+          type: string
+          description: Cluster id
+          example: cluster-k3s-edge-01
+        replicas:
+          type: integer
+          minimum: 0
+          maximum: 50
+          default: 1
+        env:
+          type: array
+          description: Plain values or a secretRef; a given entry must set exactly one of value/secretRef.
+          items:
+            $ref: '#/components/schemas/EnvVar'
+    AppPhase:
+      type: string
+      enum: [Pending, Building, Deploying, Running, Degraded, Failed]
+    EnvVar:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        value: { type: string }
+        secretRef:
+          type: object
+          required: [name, key]
+          properties:
+            name: { type: string }
+            key: { type: string }
+    AppSummary:
+      type: object
+      required: [name, namespace, targetCluster, status]
+      properties:
+        name: { type: string }
+        namespace: { type: string }
+        targetCluster: { type: string }
+        status: { $ref: '#/components/schemas/AppPhase' }
+        routeUrl: { type: string, nullable: true }
+    AppDetail:
+      allOf:
+        - $ref: '#/components/schemas/AppSummary'
+        - type: object
+          properties:
+            gitRepository: { type: string }
+            branch: { type: string }
+            builder: { $ref: '#/components/schemas/Builder' }
+            replicas: { type: integer }
+            availableReplicas: { type: integer }
+            message: { type: string, nullable: true }
+            buildPodName: { type: string, nullable: true }
+            imageRef: { type: string, nullable: true }
+            createdAt: { type: string, format: date-time }
+    LogEvent:
+      type: object
+      required: [ts, pod, container, stream, line]
+      properties:
+        ts: { type: string, format: date-time }
+        pod: { type: string }
+        container: { type: string }
+        stream:
+          type: string
+          enum: [stdout, stderr]
+        line: { type: string }

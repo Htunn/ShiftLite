@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/kubeweave-core",
+    "crates/kubeweave-crd",
+    "crates/kubeweave-auth",
+    "crates/kubeweave-cluster",
+    "crates/kubeweave-controller",
+    "crates/kubeweave-api",
+    "crates/kubeweave-bin",
+]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+schemars = "1"
+thiserror = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+futures = "0.3"
+chrono = { version = "0.4", features = ["serde"] }
+
+kubeweave-core = { path = "crates/kubeweave-core" }
+kubeweave-crd = { path = "crates/kubeweave-crd" }
+kubeweave-auth = { path = "crates/kubeweave-auth" }
+kubeweave-cluster = { path = "crates/kubeweave-cluster" }
+kubeweave-controller = { path = "crates/kubeweave-controller" }
+kubeweave-api = { path = "crates/kubeweave-api" }

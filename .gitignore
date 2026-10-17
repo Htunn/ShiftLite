@@ -1,0 +1,31 @@
+# --- Rust (control-plane/) ---
+control-plane/target/
+**/target/
+*.pdb
+
+# --- Node / React (ui/) ---
+ui/node_modules/
+ui/dist/
+ui/.vite/
+ui/*.tsbuildinfo
+npm-debug.log*
+
+# --- Local config & secrets (never commit real credentials) ---
+control-plane/config.yaml
+control-plane/dev-keys/
+**/*.pem
+**/*.kubeconfig
+.env
+.env.*
+
+# --- OS / editor ---
+.DS_Store
+.idea/
+*.swp
+
+# --- Logs ---
+*.log
+
+# --- Internal planning docs (not part of the release) ---
+docs/adr/
+specs/
