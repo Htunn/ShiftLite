@@ -93,6 +93,24 @@ ui-build: ## Production build of the UI (ui/dist/)
 ui-dev: ## Run the UI dev server (proxies /api to localhost:8080)
 	cd $(UI) && npm run dev
 
+## --- Docker Compose (production-style) ---
+
+.PHONY: docker-build
+docker-build: ## Build the control-plane and ui images
+	docker compose build
+
+.PHONY: docker-up
+docker-up: ## Start the control-plane + ui stack (detached)
+	docker compose up -d --build
+
+.PHONY: docker-down
+docker-down: ## Stop and remove the stack
+	docker compose down
+
+.PHONY: docker-logs
+docker-logs: ## Follow logs from both services
+	docker compose logs -f
+
 ## --- Aggregate targets ---
 
 .PHONY: build

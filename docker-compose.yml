@@ -1,0 +1,53 @@
+name: kubeweave
+
+# Production-style deployment: the control plane and the UI are built as separate
+# images and reverse-proxied behind nginx on one origin (see ui/docker/nginx.conf),
+# matching the same-origin requirement in SPEC-001's UI notes.
+#
+# Before `docker compose up`:
+#   1. make keys    # generates control-plane/dev-keys/{private,public}.pem
+#   2. make config  # copies control-plane/config.example.yaml -> config.yaml
+#   3. Edit control-plane/config.yaml:
+#      - signing_key paths -> /etc/kubeweave/keys/private.pem and .../public.pem
+#      - clusters[].kubeconfig_path -> /etc/kubeweave/kubeconfigs/<file>, and copy the
+#        matching kubeconfig into ./control-plane/kubeconfigs/
+#      - if a registered cluster's API server is reachable only via localhost on the
+#        Docker host (e.g. a local k3s), point its kubeconfig at
+#        https://host.docker.internal:6443 instead of 127.0.0.1.
+#   4. Put a kubeconfig for the control plane's own "home" cluster (used for the
+#      session-revocation Lease) at ./control-plane/kubeconfigs/home.kubeconfig.
+#
+# See docs/DEPLOYMENT.md for the full walkthrough.
+
+services:
+  control-plane:
+    build:
+      context: .
+      dockerfile: control-plane/Dockerfile
+    image: kubeweave/control-plane:1.0.0
+    restart: unless-stopped
+    environment:
+      KUBEWEAVE_CONFIG: /etc/kubeweave/config.yaml
+      KUBECONFIG: /etc/kubeweave/kubeconfigs/home.kubeconfig
+      RUST_LOG: info
+    volumes:
+      - ./control-plane/config.yaml:/etc/kubeweave/config.yaml:ro
+      - ./control-plane/dev-keys:/etc/kubeweave/keys:ro
+      - ./control-plane/kubeconfigs:/etc/kubeweave/kubeconfigs:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # no-op on Docker Desktop, needed on Linux
+    # Not published by default — only the "ui" service's nginx talks to it, on the
+    # internal compose network. Uncomment to call the API directly while debugging:
+    # ports:
+    #   - "8080:8080"
+
+  ui:
+    build:
+      context: .
+      dockerfile: ui/Dockerfile
+    image: kubeweave/ui:1.0.0
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - control-plane

@@ -80,10 +80,55 @@ make ui-dev
 Open `http://localhost:5173` — the dev server proxies `/api` to the control plane on
 `localhost:8080`.
 
+## Docker Compose (production-style)
+
+`docker-compose.yml` at the repo root builds the control plane (`control-plane/Dockerfile`)
+and the UI (`ui/Dockerfile`, served by nginx) as separate images, with nginx reverse-proxying
+`/api`, `/healthz`, and `/readyz` to the control plane on the internal compose network —
+keeping everything on one origin so cookies and SSE work without CORS, per SPEC-001.
+
+```bash
+make keys     # generates control-plane/dev-keys/{private,public}.pem
+make config   # copies control-plane/config.example.yaml -> config.yaml
+```
+
+Edit `control-plane/config.yaml` for the container paths used by `docker-compose.yml`:
+
+- `signing_key.private_key_path` / `public_key_path` → `/etc/kubeweave/keys/private.pem`
+  and `/etc/kubeweave/keys/public.pem` (bind-mounted from `control-plane/dev-keys/`).
+- `clusters[].kubeconfig_path` → `/etc/kubeweave/kubeconfigs/<file>`, and copy the matching
+  kubeconfig file into `control-plane/kubeconfigs/` (gitignored, bind-mounted read-only).
+- Also place a kubeconfig for the control plane's own "home" cluster (used for the
+  session-revocation `Lease`) at `control-plane/kubeconfigs/home.kubeconfig` — this is what
+  `KUBECONFIG` points at inside the container.
+- If a registered cluster's API server is only reachable via `127.0.0.1` on the Docker
+  host (a local k3s, for example), point that cluster's kubeconfig at
+  `https://host.docker.internal:6443` instead — containers can't reach the host's
+  loopback interface directly.
+
+Then build and start both services:
+
+```bash
+make docker-up       # docker compose up -d --build
+make docker-logs     # follow both services' logs
+```
+
+The UI is served at `http://localhost:8080`; the control plane itself is not published to
+the host by default (only `ui`'s nginx talks to it, over the internal compose network) —
+see the commented-out `ports:` block in `docker-compose.yml` to expose it directly for
+debugging.
+
+```bash
+make docker-down     # stop and remove the stack
+```
+
+This packages the control plane and UI as container images and runs them together, but it
+is still a single-host deployment (`docker compose`), not a Kubernetes-native one.
+
 ## Not yet implemented
 
-The control plane does not yet ship as a container image, Helm chart, or Kubernetes
-`Deployment` manifest for running **itself** inside a cluster — today it's run as a local
-process against whichever clusters you register (steps above). Containerizing the control
-plane and packaging it for in-cluster deployment is tracked as a post-v1.0.0 item; see the
-"Status" note in the [README](../README.md).
+Running the control plane **as a workload inside a Kubernetes cluster** (a Helm chart or
+plain `Deployment`/`Service`/`Ingress` manifests for the control plane itself, using a
+`ServiceAccount` instead of mounted kubeconfigs) is not yet implemented — today it runs
+either as a local process or via `docker-compose.yml` outside the clusters it manages. This
+is tracked as a post-v1.0.0 item; see the "Status" note in the [README](../README.md).

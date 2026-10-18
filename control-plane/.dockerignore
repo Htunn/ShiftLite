@@ -1,0 +1,6 @@
+target/
+dev-keys/
+config.yaml
+*.pem
+*.kubeconfig
+.git/

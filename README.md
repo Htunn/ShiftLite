@@ -147,6 +147,20 @@ cd control-plane && cargo build --release -p kubeweave-bin
 cd ui && npm run build
 ```
 
+### Docker Compose
+
+`docker-compose.yml` packages both as container images (control plane: multi-stage Rust
+build; UI: nginx reverse-proxying `/api` to the control plane on one origin):
+
+```bash
+make keys && make config   # generate signing keys + config.yaml, then edit config.yaml
+make docker-up             # docker compose up -d --build
+make docker-down
+```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md#docker-compose-production-style) for the
+config paths and kubeconfig setup this expects.
+
 ## Testing
 
 ```bash
