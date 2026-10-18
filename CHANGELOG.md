@@ -6,6 +6,18 @@ All notable changes to ShiftLite are documented in this file. The format follows
 
 ## [Unreleased]
 
+### Added
+- `docker-compose.yml` with a multi-stage `control-plane/Dockerfile` and nginx-based `ui/Dockerfile` for a production-style local deployment.
+- Dev-only session minting tool (`cargo run -p shiftlite-auth --example mint_dev_session`) for exercising authenticated API endpoints end to end without a real OIDC provider.
+- Confluence-style page headers (status/owner/related-pages table, table of contents, info/warning panels) across `docs/`.
+
+### Fixed
+- `GET /api/v1/auth/login` and `GET /api/v1/auth/callback` now redirect with `302 Found` as documented in `api/openapi.yaml`, instead of axum's default `303 See Other`.
+- Enabled the `kube/socks5` feature so a kubeconfig with a `socks5://` `proxy-url` (e.g. reaching a cluster over an SSH tunnel) no longer crashes the control plane on startup.
+
+### Changed
+- Project renamed from KubeWeave to ShiftLite (crates, CRD group `shiftlite.io`, cookies `sl_session`/`sl_oauth`, env var `SHIFTLITE_CONFIG`, Docker image names).
+
 ## [1.0.0] - 2026-10-17
 
 ### Added

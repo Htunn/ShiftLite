@@ -5,7 +5,8 @@ use crate::session::AuthSession;
 use crate::state::{AppState, OAuthProviderConfig};
 use crate::types::UserInfo;
 use axum::extract::{Query, State};
-use axum::response::{IntoResponse, Redirect};
+use axum::http::header;
+use axum::response::{IntoResponse, Response};
 use axum::Json;
 use axum_extra::extract::cookie::{Cookie, SameSite};
 use axum_extra::extract::CookieJar;
@@ -55,6 +56,11 @@ fn oauth_cookie(value: String) -> Cookie<'static> {
         .build()
 }
 
+/// `302 Found` redirect (api/openapi.yaml documents 302, not axum's default 303 See Other).
+fn found(url: &str) -> Response {
+    (axum::http::StatusCode::FOUND, [(header::LOCATION, url)]).into_response()
+}
+
 pub async fn login(
     State(state): State<AppState>,
     Query(params): Query<LoginParams>,
@@ -88,7 +94,7 @@ pub async fn login(
         .map_err(|_| AppError(ApiError::Internal))?;
     let jar = CookieJar::new().add(oauth_cookie(cookie_value));
 
-    Ok((jar, Redirect::to(&url)))
+    Ok((jar, found(&url)))
 }
 
 #[derive(Deserialize)]
@@ -262,7 +268,7 @@ pub async fn callback(
     if let Some(err) = params.error {
         tracing::warn!(error = %err, "idp returned an error");
         let jar = jar.remove(Cookie::from(OAUTH_COOKIE));
-        return Ok((jar, Redirect::to(&format!("/login?error={err}"))));
+        return Ok((jar, found(&format!("/login?error={err}"))));
     }
     let code = params.code.ok_or(AppError(ApiError::InvalidState))?;
     let returned_state = params.state.ok_or(AppError(ApiError::InvalidState))?;
@@ -332,7 +338,7 @@ pub async fn callback(
         .remove(Cookie::from(OAUTH_COOKIE))
         .add(session_cookie(session_token, SESSION_MAX_LIFETIME_SECS));
 
-    Ok((jar, Redirect::to(&cookie_claims.redirect_to)))
+    Ok((jar, found(&cookie_claims.redirect_to)))
 }
 
 pub async fn logout(
