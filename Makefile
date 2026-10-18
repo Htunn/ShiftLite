@@ -1,4 +1,4 @@
-### KubeWeave local testing Makefile
+### ShiftLite local testing Makefile
 ### Run `make help` for a list of targets.
 
 SHELL := /bin/bash
@@ -6,8 +6,8 @@ SHELL := /bin/bash
 
 CONTROL_PLANE := control-plane
 UI := ui
-CRD := deploy/crds/appdeployments.kubeweave.io.yaml
-KUBEWEAVE_CONFIG ?= $(CONTROL_PLANE)/config.yaml
+CRD := deploy/crds/appdeployments.shiftlite.io.yaml
+SHIFTLITE_CONFIG ?= $(CONTROL_PLANE)/config.yaml
 
 .PHONY: help
 help: ## Show this help
@@ -23,7 +23,7 @@ keys: ## Generate a dev Ed25519 session-signing keypair under control-plane/dev-
 
 .PHONY: config
 config: ## Copy config.example.yaml to config.yaml if it doesn't exist yet
-	test -f $(KUBEWEAVE_CONFIG) || cp $(CONTROL_PLANE)/config.example.yaml $(KUBEWEAVE_CONFIG)
+	test -f $(SHIFTLITE_CONFIG) || cp $(CONTROL_PLANE)/config.example.yaml $(SHIFTLITE_CONFIG)
 
 ## --- Kubernetes (k3s/k8s) ---
 
@@ -39,7 +39,7 @@ crd-dry-run: ## Server-side dry-run of the AppDeployment CRD against the live cl
 .PHONY: crd-apply
 crd-apply: ## Install the AppDeployment CRD into the current kubectl context
 	kubectl apply -f $(CRD)
-	kubectl get crd appdeployments.kubeweave.io
+	kubectl get crd appdeployments.shiftlite.io
 
 ## --- Rust control plane ---
 
@@ -60,12 +60,12 @@ cp-test: ## Run all Rust unit/integration tests
 	cd $(CONTROL_PLANE) && cargo test --workspace
 
 .PHONY: cp-build
-cp-build: ## Release build of kubeweave-bin
-	cd $(CONTROL_PLANE) && cargo build --release -p kubeweave-bin
+cp-build: ## Release build of shiftlite-bin
+	cd $(CONTROL_PLANE) && cargo build --release -p shiftlite-bin
 
 .PHONY: cp-run
-cp-run: config ## Run the control plane locally (KUBEWEAVE_CONFIG=$(KUBEWEAVE_CONFIG))
-	cd $(CONTROL_PLANE) && KUBEWEAVE_CONFIG=$(CURDIR)/$(KUBEWEAVE_CONFIG) cargo run -p kubeweave-bin
+cp-run: config ## Run the control plane locally (SHIFTLITE_CONFIG=$(SHIFTLITE_CONFIG))
+	cd $(CONTROL_PLANE) && SHIFTLITE_CONFIG=$(CURDIR)/$(SHIFTLITE_CONFIG) cargo run -p shiftlite-bin
 
 ## --- React UI ---
 

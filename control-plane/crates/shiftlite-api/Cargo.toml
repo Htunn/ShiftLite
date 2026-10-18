@@ -1,0 +1,28 @@
+[package]
+name = "shiftlite-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+axum = { version = "0.8.9", features = ["macros"] }
+axum-extra = { version = "0.12.6", features = ["cookie"] }
+chrono.workspace = true
+futures = "=0.3.31"
+jsonwebtoken = { version = "11.1.0", features = ["rust_crypto"] }
+k8s-openapi = { version = "0.28.0", features = ["v1_32"] }
+kube = { version = "4.2.0", default-features = false, features = ["client", "runtime", "rustls-tls"] }
+shiftlite-auth.workspace = true
+shiftlite-cluster.workspace = true
+shiftlite-core.workspace = true
+shiftlite-crd.workspace = true
+reqwest = { version = "0.13.5", default-features = false, features = ["json", "rustls"] }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+time = "0.3.55"
+tokio = { workspace = true, features = ["full"] }
+tower = "0.5.3"
+tower-http = { version = "0.7.1", features = ["trace", "cors"] }
+tracing.workspace = true

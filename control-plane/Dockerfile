@@ -13,21 +13,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /workspace
 COPY control-plane/ ./control-plane/
 WORKDIR /workspace/control-plane
-RUN cargo build --release -p kubeweave-bin
+RUN cargo build --release -p shiftlite-bin
 
 FROM debian:bookworm-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd --system --no-create-home --uid 10001 kubeweave
+    && useradd --system --no-create-home --uid 10001 shiftlite
 
-COPY --from=builder /workspace/control-plane/target/release/kubeweave-bin /usr/local/bin/kubeweave-bin
+COPY --from=builder /workspace/control-plane/target/release/shiftlite-bin /usr/local/bin/shiftlite-bin
 
-USER kubeweave
-WORKDIR /home/kubeweave
-ENV KUBEWEAVE_CONFIG=/etc/kubeweave/config.yaml
+USER shiftlite
+WORKDIR /home/shiftlite
+ENV SHIFTLITE_CONFIG=/etc/shiftlite/config.yaml
 EXPOSE 8080
 
 HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=5 \
     CMD curl -fsS http://127.0.0.1:8080/healthz || exit 1
 
-ENTRYPOINT ["/usr/local/bin/kubeweave-bin"]
+ENTRYPOINT ["/usr/local/bin/shiftlite-bin"]

@@ -1,13 +1,13 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/kubeweave-core",
-    "crates/kubeweave-crd",
-    "crates/kubeweave-auth",
-    "crates/kubeweave-cluster",
-    "crates/kubeweave-controller",
-    "crates/kubeweave-api",
-    "crates/kubeweave-bin",
+    "crates/shiftlite-core",
+    "crates/shiftlite-crd",
+    "crates/shiftlite-auth",
+    "crates/shiftlite-cluster",
+    "crates/shiftlite-controller",
+    "crates/shiftlite-api",
+    "crates/shiftlite-bin",
 ]
 
 [workspace.package]
@@ -28,9 +28,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 futures = "0.3"
 chrono = { version = "0.4", features = ["serde"] }
 
-kubeweave-core = { path = "crates/kubeweave-core" }
-kubeweave-crd = { path = "crates/kubeweave-crd" }
-kubeweave-auth = { path = "crates/kubeweave-auth" }
-kubeweave-cluster = { path = "crates/kubeweave-cluster" }
-kubeweave-controller = { path = "crates/kubeweave-controller" }
-kubeweave-api = { path = "crates/kubeweave-api" }
+shiftlite-core = { path = "crates/shiftlite-core" }
+shiftlite-crd = { path = "crates/shiftlite-crd" }
+shiftlite-auth = { path = "crates/shiftlite-auth" }
+shiftlite-cluster = { path = "crates/shiftlite-cluster" }
+shiftlite-controller = { path = "crates/shiftlite-controller" }
+shiftlite-api = { path = "crates/shiftlite-api" }

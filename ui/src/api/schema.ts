@@ -323,7 +323,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Redirect to Identity Provider; sets short-lived kw_oauth cookie */
+            /** @description Redirect to Identity Provider; sets short-lived sl_oauth cookie */
             302: {
                 headers: {
                     Location?: string;
@@ -350,7 +350,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Redirect to the UI; sets kw_session cookie on success, or /login?error=... on IdP error */
+            /** @description Redirect to the UI; sets sl_session cookie on success, or /login?error=... on IdP error */
             302: {
                 headers: {
                     Location?: string;

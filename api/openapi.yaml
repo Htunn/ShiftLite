@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: KubeWeave Control Plane API
+  title: ShiftLite Control Plane API
   version: 1.0.0
-  description: REST and SSE interface driving the KubeWeave platform (Rust control plane).
+  description: REST and SSE interface driving the ShiftLite platform (Rust control plane).
 servers:
   - url: /
 security:
@@ -26,7 +26,7 @@ paths:
             $ref: '#/components/schemas/Provider'
       responses:
         '302':
-          description: Redirect to Identity Provider; sets short-lived kw_oauth cookie
+          description: Redirect to Identity Provider; sets short-lived sl_oauth cookie
           headers:
             Location:
               schema: { type: string, format: uri }
@@ -53,7 +53,7 @@ paths:
           schema: { type: string }
       responses:
         '302':
-          description: Redirect to the UI; sets kw_session cookie on success, or /login?error=... on IdP error
+          description: Redirect to the UI; sets sl_session cookie on success, or /login?error=... on IdP error
           headers:
             Location:
               schema: { type: string }
@@ -222,7 +222,7 @@ components:
     sessionCookie:
       type: apiKey
       in: cookie
-      name: kw_session
+      name: sl_session
   parameters:
     Namespace:
       name: namespace

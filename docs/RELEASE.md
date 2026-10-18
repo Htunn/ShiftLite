@@ -1,6 +1,6 @@
 # Release process
 
-Checklist for cutting a KubeWeave release. v1.0.0 followed this process; use it for
+Checklist for cutting a ShiftLite release. v1.0.0 followed this process; use it for
 every subsequent release too.
 
 ## 1. Decide the version

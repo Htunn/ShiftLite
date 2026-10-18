@@ -1634,131 +1634,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "kubeweave-api"
-version = "1.0.0"
-dependencies = [
- "axum",
- "axum-extra",
- "chrono",
- "futures",
- "jsonwebtoken",
- "k8s-openapi",
- "kube",
- "kubeweave-auth",
- "kubeweave-cluster",
- "kubeweave-core",
- "kubeweave-crd",
- "reqwest",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "time",
- "tokio",
- "tower",
- "tower-http 0.7.1",
- "tracing",
-]
-
-[[package]]
-name = "kubeweave-auth"
-version = "1.0.0"
-dependencies = [
- "base64 0.23.1",
- "chrono",
- "jsonwebtoken",
- "kubeweave-core",
- "rand 0.10.3",
- "serde",
- "serde_json",
- "sha2 0.11.1",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "kubeweave-bin"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "axum",
- "k8s-openapi",
- "kube",
- "kubeweave-api",
- "kubeweave-auth",
- "kubeweave-cluster",
- "kubeweave-controller",
- "kubeweave-core",
- "kubeweave-crd",
- "reqwest",
- "serde",
- "serde_json",
- "serde_yaml",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
-
-[[package]]
-name = "kubeweave-cluster"
-version = "1.0.0"
-dependencies = [
- "bytes",
- "chrono",
- "futures",
- "http",
- "http-body-util",
- "k8s-openapi",
- "kube",
- "kubeweave-auth",
- "kubeweave-core",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tower",
- "tracing",
-]
-
-[[package]]
-name = "kubeweave-controller"
-version = "1.0.0"
-dependencies = [
- "chrono",
- "futures",
- "k8s-openapi",
- "kube",
- "kubeweave-cluster",
- "kubeweave-core",
- "kubeweave-crd",
- "schemars",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "kubeweave-core"
-version = "1.0.0"
-dependencies = [
- "schemars",
- "serde",
- "thiserror 1.0.69",
-]
-
-[[package]]
-name = "kubeweave-crd"
-version = "1.0.0"
-dependencies = [
- "k8s-openapi",
- "kube",
- "kubeweave-core",
- "schemars",
- "serde",
- "serde_json",
-]
-
-[[package]]
 name = "lazy_static"
 version = "1.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1769,9 +1644,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.190"
+version = "0.2.191"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78"
+checksum = "65cd87c9a6d60536580b316ad985726104730a5151c99845f2490428ef91240a"
 
 [[package]]
 name = "libm"
@@ -2575,9 +2450,9 @@ dependencies = [
 
 [[package]]
 name = "schannel"
-version = "0.1.29"
+version = "0.1.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91c1b7e4904c873ef0710c1f407dde2e6287de2bebc1bbbf7d430bb7cbffd939"
+checksum = "9cb23c424d8ee841bb4d813677ca237e2a610067d594fec130f87d6093495ab5"
 dependencies = [
  "windows-sys 0.61.2",
 ]
@@ -2813,6 +2688,131 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f40ca3c46823713e0d4209592e8d6e826aa57e928f09752619fc696c499637f6"
 dependencies = [
  "lazy_static",
+]
+
+[[package]]
+name = "shiftlite-api"
+version = "1.0.0"
+dependencies = [
+ "axum",
+ "axum-extra",
+ "chrono",
+ "futures",
+ "jsonwebtoken",
+ "k8s-openapi",
+ "kube",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "shiftlite-auth",
+ "shiftlite-cluster",
+ "shiftlite-core",
+ "shiftlite-crd",
+ "thiserror 1.0.69",
+ "time",
+ "tokio",
+ "tower",
+ "tower-http 0.7.1",
+ "tracing",
+]
+
+[[package]]
+name = "shiftlite-auth"
+version = "1.0.0"
+dependencies = [
+ "base64 0.23.1",
+ "chrono",
+ "jsonwebtoken",
+ "rand 0.10.3",
+ "serde",
+ "serde_json",
+ "sha2 0.11.1",
+ "shiftlite-core",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "shiftlite-bin"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "k8s-openapi",
+ "kube",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "shiftlite-api",
+ "shiftlite-auth",
+ "shiftlite-cluster",
+ "shiftlite-controller",
+ "shiftlite-core",
+ "shiftlite-crd",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
+name = "shiftlite-cluster"
+version = "1.0.0"
+dependencies = [
+ "bytes",
+ "chrono",
+ "futures",
+ "http",
+ "http-body-util",
+ "k8s-openapi",
+ "kube",
+ "serde",
+ "serde_json",
+ "shiftlite-auth",
+ "shiftlite-core",
+ "thiserror 1.0.69",
+ "tokio",
+ "tower",
+ "tracing",
+]
+
+[[package]]
+name = "shiftlite-controller"
+version = "1.0.0"
+dependencies = [
+ "chrono",
+ "futures",
+ "k8s-openapi",
+ "kube",
+ "schemars",
+ "serde",
+ "serde_json",
+ "shiftlite-cluster",
+ "shiftlite-core",
+ "shiftlite-crd",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "shiftlite-core"
+version = "1.0.0"
+dependencies = [
+ "schemars",
+ "serde",
+ "thiserror 1.0.69",
+]
+
+[[package]]
+name = "shiftlite-crd"
+version = "1.0.0"
+dependencies = [
+ "k8s-openapi",
+ "kube",
+ "schemars",
+ "serde",
+ "serde_json",
+ "shiftlite-core",
 ]
 
 [[package]]

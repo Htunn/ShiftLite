@@ -1,6 +1,6 @@
-# KubeWeave
+# ShiftLite
 
-**KubeWeave** is a self-service developer platform for turning a Git repository into a
+**ShiftLite** is a self-service developer platform for turning a Git repository into a
 running, routable application across standard Kubernetes (k8s) and lightweight k3s
 clusters — without hand-writing manifests, build jobs, ingress, or storage configuration.
 
@@ -22,13 +22,13 @@ point at a Git repo and a target cluster.
 > multi-cluster fleet management, richer topology views, and production hardening are
 > still being built out. See [CHANGELOG.md](CHANGELOG.md) for release notes.
 
-## Why KubeWeave?
+## Why ShiftLite?
 
 Running apps on Kubernetes usually means writing and maintaining Deployments, Services,
 Ingresses, PVCs, and a build pipeline by hand — and doing it all over again, slightly
-differently, for every cluster flavor you support. KubeWeave removes that duplication:
+differently, for every cluster flavor you support. ShiftLite removes that duplication:
 
-- **One Git push in, a running app out.** Point KubeWeave at a Git repo and a target
+- **One Git push in, a running app out.** Point ShiftLite at a Git repo and a target
   cluster; it builds the image (rootless BuildKit), pushes it to your registry, and
   renders the Deployment/Service/Ingress for you.
 - **k3s and standard k8s from the same control plane.** Register edge k3s nodes and
@@ -88,8 +88,8 @@ ui/               React + Tailwind frontend
 ### 1. Install the CRD
 
 ```bash
-kubectl apply -f deploy/crds/appdeployments.kubeweave.io.yaml
-kubectl get crd appdeployments.kubeweave.io
+kubectl apply -f deploy/crds/appdeployments.shiftlite.io.yaml
+kubectl get crd appdeployments.shiftlite.io
 ```
 
 ### 2. Configure the control plane
@@ -119,7 +119,7 @@ Edit `config.yaml`:
 
 ```bash
 cd control-plane
-KUBEWEAVE_CONFIG=./config.yaml cargo run -p kubeweave-bin
+SHIFTLITE_CONFIG=./config.yaml cargo run -p shiftlite-bin
 ```
 
 The API listens on `bind_addr` from `config.yaml` (default `0.0.0.0:8080`), and exposes
@@ -141,7 +141,7 @@ The dev server proxies `/api` and `/healthz` to `http://localhost:8080` (see
 
 ```bash
 # Control plane
-cd control-plane && cargo build --release -p kubeweave-bin
+cd control-plane && cargo build --release -p shiftlite-bin
 
 # UI (static assets under ui/dist/)
 cd ui && npm run build

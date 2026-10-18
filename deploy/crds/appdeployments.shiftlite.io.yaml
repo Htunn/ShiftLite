@@ -1,0 +1,97 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: appdeployments.shiftlite.io
+spec:
+  group: shiftlite.io
+  scope: Namespaced
+  names:
+    plural: appdeployments
+    singular: appdeployment
+    kind: AppDeployment
+    shortNames: [slapp]
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      subresources:
+        status: {}
+      additionalPrinterColumns:
+        - name: Phase
+          type: string
+          jsonPath: .status.phase
+        - name: Ready
+          type: integer
+          jsonPath: .status.availableReplicas
+        - name: URL
+          type: string
+          jsonPath: .status.routeUrl
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              required:
+                - gitRepository
+              properties:
+                gitRepository:
+                  type: string
+                  pattern: '^https://'
+                branch:
+                  type: string
+                  default: main
+                builder:
+                  type: string
+                  enum: [buildkit, dockerfile]
+                  default: buildkit
+                replicas:
+                  type: integer
+                  minimum: 0
+                  maximum: 50
+                  default: 1
+                env:
+                  type: array
+                  items:
+                    type: object
+                    required: [name]
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
+                      secretRef:
+                        type: object
+                        required: [name, key]
+                        properties:
+                          name:
+                            type: string
+                          key:
+                            type: string
+                route:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                      default: true
+                    hostname:
+                      type: string
+            status:
+              type: object
+              properties:
+                phase:
+                  type: string
+                  enum: [Pending, Building, Deploying, Running, Degraded, Failed]
+                message:
+                  type: string
+                buildPodName:
+                  type: string
+                imageRef:
+                  type: string
+                routeUrl:
+                  type: string
+                availableReplicas:
+                  type: integer
+                observedGeneration:
+                  type: integer
+                  format: int64

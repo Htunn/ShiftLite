@@ -1,4 +1,4 @@
-name: kubeweave
+name: shiftlite
 
 # Production-style deployment: the control plane and the UI are built as separate
 # images and reverse-proxied behind nginx on one origin (see ui/docker/nginx.conf),
@@ -8,8 +8,8 @@ name: kubeweave
 #   1. make keys    # generates control-plane/dev-keys/{private,public}.pem
 #   2. make config  # copies control-plane/config.example.yaml -> config.yaml
 #   3. Edit control-plane/config.yaml:
-#      - signing_key paths -> /etc/kubeweave/keys/private.pem and .../public.pem
-#      - clusters[].kubeconfig_path -> /etc/kubeweave/kubeconfigs/<file>, and copy the
+#      - signing_key paths -> /etc/shiftlite/keys/private.pem and .../public.pem
+#      - clusters[].kubeconfig_path -> /etc/shiftlite/kubeconfigs/<file>, and copy the
 #        matching kubeconfig into ./control-plane/kubeconfigs/
 #      - if a registered cluster's API server is reachable only via localhost on the
 #        Docker host (e.g. a local k3s), point its kubeconfig at
@@ -24,16 +24,16 @@ services:
     build:
       context: .
       dockerfile: control-plane/Dockerfile
-    image: kubeweave/control-plane:1.0.0
+    image: shiftlite/control-plane:1.0.0
     restart: unless-stopped
     environment:
-      KUBEWEAVE_CONFIG: /etc/kubeweave/config.yaml
-      KUBECONFIG: /etc/kubeweave/kubeconfigs/home.kubeconfig
+      SHIFTLITE_CONFIG: /etc/shiftlite/config.yaml
+      KUBECONFIG: /etc/shiftlite/kubeconfigs/home.kubeconfig
       RUST_LOG: info
     volumes:
-      - ./control-plane/config.yaml:/etc/kubeweave/config.yaml:ro
-      - ./control-plane/dev-keys:/etc/kubeweave/keys:ro
-      - ./control-plane/kubeconfigs:/etc/kubeweave/kubeconfigs:ro
+      - ./control-plane/config.yaml:/etc/shiftlite/config.yaml:ro
+      - ./control-plane/dev-keys:/etc/shiftlite/keys:ro
+      - ./control-plane/kubeconfigs:/etc/shiftlite/kubeconfigs:ro
     extra_hosts:
       - "host.docker.internal:host-gateway" # no-op on Docker Desktop, needed on Linux
     # Not published by default — only the "ui" service's nginx talks to it, on the
@@ -45,7 +45,7 @@ services:
     build:
       context: .
       dockerfile: ui/Dockerfile
-    image: kubeweave/ui:1.0.0
+    image: shiftlite/ui:1.0.0
     restart: unless-stopped
     ports:
       - "8080:80"

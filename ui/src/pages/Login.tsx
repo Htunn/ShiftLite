@@ -13,7 +13,7 @@ export default function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="w-full max-w-sm space-y-4 rounded border border-slate-800 bg-slate-900 p-6">
-        <h1 className="text-xl font-semibold">Sign in to KubeWeave</h1>
+        <h1 className="text-xl font-semibold">Sign in to ShiftLite</h1>
         {error && (
           <p className="rounded bg-red-500/10 px-3 py-2 text-sm text-red-300">
             Sign-in failed: {error}

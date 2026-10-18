@@ -20,7 +20,7 @@ a distinct `id` in `clusters:` (see step 4).
 ```bash
 make crd-dry-run   # server-side dry-run first — safe, makes no changes
 make crd-apply
-kubectl get crd appdeployments.kubeweave.io
+kubectl get crd appdeployments.shiftlite.io
 kubectl explain appdeployment.spec
 ```
 
@@ -49,7 +49,7 @@ Edit `control-plane/config.yaml`:
   node itself). Omit it only if the control plane process itself will run inside that
   cluster.
 - `clusters[].registry`: a container registry you can push images to (Docker Hub, GHCR,
-  or a GitLab Container Registry) — KubeWeave does not host its own registry.
+  or a GitLab Container Registry) — ShiftLite does not host its own registry.
 - `oauth_providers`: fill in the identity providers you actually use; delete the rest.
 
 ## 5. Run the control plane against the cluster
@@ -58,7 +58,7 @@ Edit `control-plane/config.yaml`:
 make cp-run
 ```
 
-This runs `kubeweave-bin` locally (not inside the cluster) with `KUBEWEAVE_CONFIG`
+This runs `shiftlite-bin` locally (not inside the cluster) with `SHIFTLITE_CONFIG`
 pointing at `control-plane/config.yaml`. On startup it detects each registered cluster's
 engine type from its reported `gitVersion` (`+k3s` → k3s profile, otherwise k8s profile)
 and starts one reconcile loop per cluster.
@@ -94,9 +94,9 @@ make config   # copies control-plane/config.example.yaml -> config.yaml
 
 Edit `control-plane/config.yaml` for the container paths used by `docker-compose.yml`:
 
-- `signing_key.private_key_path` / `public_key_path` → `/etc/kubeweave/keys/private.pem`
-  and `/etc/kubeweave/keys/public.pem` (bind-mounted from `control-plane/dev-keys/`).
-- `clusters[].kubeconfig_path` → `/etc/kubeweave/kubeconfigs/<file>`, and copy the matching
+- `signing_key.private_key_path` / `public_key_path` → `/etc/shiftlite/keys/private.pem`
+  and `/etc/shiftlite/keys/public.pem` (bind-mounted from `control-plane/dev-keys/`).
+- `clusters[].kubeconfig_path` → `/etc/shiftlite/kubeconfigs/<file>`, and copy the matching
   kubeconfig file into `control-plane/kubeconfigs/` (gitignored, bind-mounted read-only).
 - Also place a kubeconfig for the control plane's own "home" cluster (used for the
   session-revocation `Lease`) at `control-plane/kubeconfigs/home.kubeconfig` — this is what

@@ -6,7 +6,7 @@ export default function Navbar() {
   return (
     <header className="flex items-center justify-between border-b border-slate-800 bg-slate-900 px-6 py-3">
       <Link to="/" className="text-lg font-semibold text-slate-100">
-        KubeWeave
+        ShiftLite
       </Link>
       <nav className="flex gap-4 text-sm text-slate-400">
         <Link className={location.pathname === '/' ? 'text-slate-100' : undefined} to="/">

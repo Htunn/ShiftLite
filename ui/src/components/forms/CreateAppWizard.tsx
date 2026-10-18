@@ -20,7 +20,7 @@ async function createApp(namespace: string, payload: CreateAppPayload) {
   const res = await fetch(`/api/v1/namespaces/${namespace}/apps`, {
     method: 'POST',
     credentials: 'include',
-    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'kubeweave' },
+    headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'shiftlite' },
     body: JSON.stringify(payload),
   });
   if (!res.ok) {
